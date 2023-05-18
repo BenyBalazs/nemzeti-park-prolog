@@ -1,0 +1,139 @@
+%parkok
+park(alomszep).
+park(fenseges).
+park(gyonyoru).
+park(pompazatos).
+park(szepseges).
+
+%látványosságok
+latvanyossag(lepkehaz).
+latvanyossag(varrom).
+latvanyossag(szokokutak).
+latvanyossag(teraszos_kertek).
+latvanyossag(fahid).
+
+%fák
+fa(100).
+fa(150).
+fa(200).
+fa(250).
+fa(300).
+
+%terület
+terulet(30).
+terulet(40).
+terulet(50).
+terulet(60).
+terulet(70).
+
+park_neve(park_adatok(X,_,_,_),X).
+nagysag(park_adatok(_,X,_,_),X).
+kulonleges_fak(park_adatok(_,_,X,_),X).
+fobb_attrakcio(park_adatok(_,_,_,X),X).
+
+nemzeti_parkok(X,lista(X,_,_,_,_)).
+nemzeti_parkok(X,lista(_,X,_,_,_)).
+nemzeti_parkok(X,lista(_,_,X,_,_)).
+nemzeti_parkok(X,lista(_,_,_,X,_)).
+nemzeti_parkok(X,lista(_,_,_,_,X)).
+
+nem_60_hektaros(30).
+nem_60_hektaros(40).
+nem_60_hektaros(50).
+nem_60_hektaros(70).
+
+nem_50_vagy_60_hektaro(30).
+nem_50_vagy_60_hektaro(40).
+nem_50_vagy_60_hektaro(70).
+
+nem_150_fa(100).
+nem_150_fa(200).
+nem_150_fa(250).
+nem_150_fa(300).
+
+nem_szokokut(lepkehaz).
+nem_szokokut(varrom).
+nem_szokokut(teraszos_kertek).
+nem_szokokut(fahid).
+
+szazzal_tobb_fa(100, 200).
+szazzal_tobb_fa(150, 250).
+szazzal_tobb_fa(200, 300).
+
+nem_250_fa(100).
+nem_250_fa(150).
+nem_250_fa(200).
+nem_250_fa(300).
+
+nem_fahid(lepkehaz).
+nem_fahid(varrom).
+nem_fahid(szokokutak).
+nem_fahid(teraszos_kertek).
+
+nem_lepkehaz(fahid).
+nem_lepkehaz(varrom).
+nem_lepkehaz(szokokutak).
+nem_lepkehaz(teraszos_kertek).
+
+megoldas(Parkok_listaja) :-
+        Parkok_listaja=lista(
+              park_adatok(alomszep,_,_,_),
+              park_adatok(fenseges,_,_,_),
+              park_adatok(gyonyoru,_,_,_),
+              park_adatok(pompazatos,_,_,_),
+              park_adatok(szepseges,_,_,_)
+              ),
+	nemzeti_parkok(KB,Parkok_listaja),kulonleges_fak(KB,150),
+    nemzeti_parkok(FE,Parkok_listaja),fobb_attrakcio(FE,szokokutak),
+    nemzeti_parkok(FA,Parkok_listaja),fobb_attrakcio(FA,fahid),
+    nemzeti_parkok(KD,Parkok_listaja),kulonleges_fak(KD,250),
+    nemzeti_parkok(TD,Parkok_listaja),nagysag(TD,60),
+
+%1. A Fenséges Parkban, ami- nek a területe nem 60 hektár, kevesebb fa van,
+% mint a Gyönyörű Parkban, ahol a kertek is sok látogatót vonzanak
+nemzeti_parkok(AFenseges, Parkok_listaja),park_neve(AFenseges, fenseges),nem_60_hektaros(ANagysag),nagysag(AFenseges, ANagysag),
+    nemzeti_parkok(BGyonyoru, Parkok_listaja),park_neve(BGyonyoru, gyonyoru),fa(BGyonyoruFa),fa(AFensegesFa), BGyonyoruFa > AFensegesFa,
+    kulonleges_fak(AFenseges, AFensegesFa),kulonleges_fak(BGyonyoru, BGyonyoruFa),fobb_attrakcio(BGyonyoru, teraszos_kertek),
+
+%2. A középkori várrom abban a parkban van,
+% ahol kb. 100 külön- leges fa látható. Ez a park nem 50 vagy 60 hektáros.
+nemzeti_parkok(CAholaAVarromVan, Parkok_listaja),fobb_attrakcio(CAholaAVarromVan, varrom),
+    nem_50_vagy_60_hektaro(CAholaAVarromVanNagysag), nagysag(CAholaAVarromVan, CAholaAVarromVanNagysag),
+    kulonleges_fak(CAholaAVarromVan, 100),
+
+%3. Az 50 hektáros parkban nem 150 fakülönlegesség tekinthető meg,
+% és nem ennek a közepén látható egy óriási szökőkút körül 19 kisebb szökőkút.
+nemzeti_parkok(OtvenHektarosPark, Parkok_listaja),nagysag(OtvenHektarosPark, 50),
+    nem_150_fa(OtvenHektarosParkFa), kulonleges_fak(OtvenHektarosPark, OtvenHektarosParkFa),
+    nem_szokokut(OtvenHektarosParkLatvanyossag), fobb_attrakcio(OtvenHektarosPark, OtvenHektarosParkLatvanyossag),
+
+%4. A legkisebb, 30 hektáros nemzeti parkban százzal több különle- ges fa van,
+% mint abban a parkban, ahol egy lepkeház is található.
+nemzeti_parkok(DLegkissebb, Parkok_listaja),nagysag(DLegkissebb, 30),nem_lepkehaz(DLegkissebbLatvanyossag), fobb_attrakcio(DLegkissebb, DLegkissebbLatvanyossag),
+nemzeti_parkok(EAholALepkehazVan, Parkok_listaja),fobb_attrakcio(EAholALepkehazVan, lepkehaz),fa(DLegkissebbFa),fa(EAholALepkehazVanFa),szazzal_tobb_fa(EAholALepkehazVanFa,DLegkissebbFa),
+    kulonleges_fak(EAholALepkehazVan, EAholALepkehazVanFa), kulonleges_fak(DLegkissebb, DLegkissebbFa),
+
+%5. A legtöbb szokatlan fa (300) a legnagyobb területű (70 hektáros) parkban van.
+nemzeti_parkok(FLegnagyobb, Parkok_listaja),nagysag(FLegnagyobb, 70), 
+    kulonleges_fak(FLegnagyobb, 300),
+
+%6. Az Álomszép Park 40 hektáron terül el.
+nemzeti_parkok(GAlomszep, Parkok_listaja),park_neve(GAlomszep, alomszep),nagysag(GAlomszep, 40),
+
+%7. A Szépséges Parkban 200 egzotikus fa található.
+nemzeti_parkok(HSzepseges, Parkok_listaja),park_neve(HSzepseges, szepseges),kulonleges_fak(HSzepseges, 200),
+
+% 8. A Pompázatos Park területén nem 250 a különleges fák száma, 
+% és nem itt szeli ketté a parkot egy patak,
+% amin egy díszesen faragott fahídon lehet átmenni.
+nemzeti_parkok(IPompazatos, Parkok_listaja),park_neve(IPompazatos, pompazatos),fa(IPompazatosFa),
+    nem_250_fa(IPompazatosFa),kulonleges_fak(IPompazatos, IPompazatosFa),
+nem_fahid(IPompazatosLatvanyossag),fobb_attrakcio(IPompazatos, IPompazatosLatvanyossag).
+
+
+
+
+
+
+
+
